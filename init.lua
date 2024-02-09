@@ -60,7 +60,6 @@ require('lazy').setup({
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
-      -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
       { 'j-hui/fidget.nvim', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
@@ -126,7 +125,7 @@ require('lazy').setup({
   },
 
   {
-    -- I Choose this theme because of ThePrimeagen
+    -- I chose this theme because of ThePrimeagen
     'rose-pine/neovim',
     name = 'rose-pine',
     priority = 1000,
@@ -134,6 +133,39 @@ require('lazy').setup({
       vim.cmd.colorscheme 'rose-pine'
     end,
   },
+  --
+  -- {
+  --   "catppuccin/nvim",
+  --   name = "catppuccin",
+  --   priority = 1000,
+  --   config = function()
+  --     vim.cmd.colorscheme 'catppuccin'
+  --   end,
+  -- },
+  --
+  -- {
+  --   -- Theme inspired by Atom
+  --   'navarasu/onedark.nvim',
+  --   priority = 1000,
+  --   config = function()
+  --     vim.cmd.colorscheme 'onedark'
+  --     require('onedark').setup {
+  --       style = "dark",
+  --       toggle_style_key = '<leader>st',
+  --       toggle_style_list = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light' },
+  --     }
+  --     require('onedark').load()
+  --   end
+  -- },
+  --
+  -- {
+  --   "folke/tokyonight.nvim",
+  --   lazy = false,
+  --   priority = 1000,
+  --   config = function()
+  --     vim.cmd.colorscheme 'tokyonight'
+  --   end,
+  -- },
 
   {
     -- Set lualine as statusline
@@ -142,7 +174,7 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'onedark',
+        theme = vim.g.colors_name,
         component_separators = '|',
         section_separators = '',
       },
@@ -250,6 +282,7 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
+-- vim.cmd("highlight Normal guibg=NONE ctermbg=NONE")
 
 -- Tab spaces
 vim.opt.tabstop = 4
@@ -262,6 +295,9 @@ vim.bo.softtabstop = 2
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
+vim.keymap.set("n", "<C-a>", "ggVG", { noremap = true, silent = true })
 
 -- Remap for ESC in insert Mode
 vim.keymap.set('i', 'kj', '<ESC>')
@@ -278,11 +314,10 @@ vim.keymap.set('t', '<C-h>', '<C-\\><C-N><C-w>h', { silent = true })
 vim.keymap.set('t', '<C-j>', '<C-\\><C-N><C-w>j', { silent = true })
 vim.keymap.set('t', '<C-k>', '<C-\\><C-N><C-w>k', { silent = true })
 vim.keymap.set('t', '<C-l>', '<C-\\><C-N><C-w>l', { silent = true })
+vim.keymap.set("n", "<leader>t", ":ToggleTerm<CR>", { noremap = true, silent = true })
 
 -- Keymaps for File Explorer
 vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
-
-vim.keymap.set("n", "<leader>t", ":ToggleTerm<CR>", { noremap = true, silent = true })
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -309,10 +344,11 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
   defaults = {
+    file_ignore_patterns = { 'node_modules', 'vendor' },
     mappings = {
       i = {
         ['<C-u>'] = false,
-        ['<C-d>'] = false,
+        ['<C-d>'] = "delete_buffer",
       },
     },
   },
@@ -522,7 +558,7 @@ local servers = {
   rust_analyzer = {},
   tsserver = {},
   templ = { filetypes = { 'templ' } },
-  html = { filetypes = { 'html', 'twig', 'hbs'} },
+  html = { filetypes = { 'html', 'twig', 'hbs' } },
 
   lua_ls = {
     Lua = {
@@ -585,24 +621,24 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_locally_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.locally_jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
+    -- ['<Tab>'] = cmp.mapping(function(fallback)
+    --   if cmp.visible() then
+    --     cmp.select_next_item()
+    --   elseif luasnip.expand_or_locally_jumpable() then
+    --     luasnip.expand_or_jump()
+    --   else
+    --     fallback()
+    --   end
+    -- end, { 'i', 's' }),
+    -- ['<S-Tab>'] = cmp.mapping(function(fallback)
+    --   if cmp.visible() then
+    --     cmp.select_prev_item()
+    --   elseif luasnip.locally_jumpable(-1) then
+    --     luasnip.jump(-1)
+    --   else
+    --     fallback()
+    --   end
+    -- end, { 'i', 's' }),
   },
   sources = {
     { name = 'nvim_lsp' },
