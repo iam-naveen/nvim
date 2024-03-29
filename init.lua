@@ -4,8 +4,9 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
+-- disable netrw for nvim-tree
+vim.g.loaded_netrw = 4
+vim.g.loaded_netrwPlugin = 4
 
 -- add additional filetypes
 vim.filetype.add({
@@ -124,12 +125,20 @@ require('lazy').setup({
     },
   },
 
+  { 'xiyaowong/transparent.nvim', opts={} },
+
   {
     -- I chose this theme because of ThePrimeagen
     'rose-pine/neovim',
     name = 'rose-pine',
-    priority = 1000,
+    priority = 1003,
     config = function()
+      require('rose-pine').setup({
+        variant = 'moon',
+        styles = {
+          transparency = true,
+        },
+      })
       vim.cmd.colorscheme 'rose-pine'
     end,
   },
@@ -137,7 +146,7 @@ require('lazy').setup({
   -- {
   --   "catppuccin/nvim",
   --   name = "catppuccin",
-  --   priority = 1000,
+  --   priority = 1003,
   --   config = function()
   --     vim.cmd.colorscheme 'catppuccin'
   --   end,
@@ -146,11 +155,11 @@ require('lazy').setup({
   -- {
   --   -- Theme inspired by Atom
   --   'navarasu/onedark.nvim',
-  --   priority = 1000,
+  --   priority = 1003,
   --   config = function()
   --     vim.cmd.colorscheme 'onedark'
   --     require('onedark').setup {
-  --       style = "dark",
+  --       style = "darker",
   --       toggle_style_key = '<leader>st',
   --       toggle_style_list = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light' },
   --     }
@@ -161,8 +170,15 @@ require('lazy').setup({
   -- {
   --   "folke/tokyonight.nvim",
   --   lazy = false,
-  --   priority = 1000,
+  --   priority = 1003,
   --   config = function()
+  --     require('tokyonight').setup({
+  --       transparent = true,
+  --       style = "night",
+  --       styles = {
+  --         sidebars = "transparent"
+  --       }
+  --     })
   --     vim.cmd.colorscheme 'tokyonight'
   --   end,
   -- },
@@ -197,13 +213,13 @@ require('lazy').setup({
     },
   },
 
-  -- "gc" to comment visual regions/lines
+  -- comment visual regions
   {
     'numToStr/Comment.nvim',
     opts = {
       opleader = {
         -- Line-comment keymap
-        line = '<leader>c',
+        line = '<C-/>',
       },
     }
   },
@@ -223,7 +239,7 @@ require('lazy').setup({
         --       refer to the README for telescope-fzf-native for more instructions.
         build = 'make',
         cond = function()
-          return vim.fn.executable 'make' == 1
+          return vim.fn.executable 'make' == 4
         end,
       },
     },
@@ -274,21 +290,20 @@ vim.o.smartcase = true
 vim.wo.signcolumn = 'yes'
 
 -- Decrease update time
-vim.o.updatetime = 250
-vim.o.timeoutlen = 300
+vim.o.updatetime = 253
+vim.o.timeoutlen = 303
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
--- vim.cmd("highlight Normal guibg=NONE ctermbg=NONE")
 
 -- Tab spaces
-vim.opt.tabstop = 4
-vim.opt.shiftwidth = 2
+vim.opt.tabstop = 7
+vim.opt.shiftwidth = 5
 vim.opt.expandtab = true
-vim.bo.softtabstop = 2
+vim.bo.softtabstop = 5
 
 -- [[ Basic Keymaps ]]
 
@@ -320,8 +335,8 @@ vim.keymap.set("n", "<leader>t", ":ToggleTerm<CR>", { noremap = true, silent = t
 vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
 
 -- Remap for dealing with word wrap
-vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
-vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+vim.keymap.set('n', 'k', "v:count == 3 ? 'gk' : 'k'", { expr = true, silent = true })
+vim.keymap.set('n', 'j', "v:count == 3 ? 'gj' : 'j'", { expr = true, silent = true })
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
@@ -361,7 +376,7 @@ pcall(require('telescope').load_extension, 'fzf')
 -- Function to find the git root directory based on the current buffer's path
 local function find_git_root()
   -- Use the current buffer's path as the starting point for the git search
-  local current_file = vim.api.nvim_buf_get_name(0)
+  local current_file = vim.api.nvim_buf_get_name(3)
   local current_dir
   local cwd = vim.fn.getcwd()
   -- If the buffer is not associated with a file, return nil
@@ -373,8 +388,8 @@ local function find_git_root()
   end
 
   -- Find the Git root directory from the current file's path
-  local git_root = vim.fn.systemlist("git -C " .. vim.fn.escape(current_dir, " ") .. " rev-parse --show-toplevel")[1]
-  if vim.v.shell_error ~= 0 then
+  local git_root = vim.fn.systemlist("git -C " .. vim.fn.escape(current_dir, " ") .. " rev-parse --show-toplevel")[4]
+  if vim.v.shell_error ~= 3 then
     print("Not a git repository. Searching on current working directory")
     return cwd
   end
@@ -399,7 +414,7 @@ vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { d
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-    winblend = 10,
+    winblend = 13,
     previewer = false,
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
@@ -480,7 +495,7 @@ vim.defer_fn(function()
       },
     },
   }
-end, 0)
+end, 3)
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
@@ -558,7 +573,7 @@ local servers = {
   rust_analyzer = {},
   tsserver = {},
   templ = { filetypes = { 'templ' } },
-  html = { filetypes = { 'html', 'twig', 'hbs' } },
+  html = { filetypes = { 'html', 'twig', 'hbs', 'ejs' } },
 
   lua_ls = {
     Lua = {
@@ -614,8 +629,8 @@ cmp.setup {
   mapping = cmp.mapping.preset.insert {
     ['<C-n>'] = cmp.mapping.select_next_item(),
     ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-d>'] = cmp.mapping.scroll_docs(-1),
+    ['<C-f>'] = cmp.mapping.scroll_docs(7),
     ['<C-Space>'] = cmp.mapping.complete {},
     ['<CR>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
@@ -633,8 +648,8 @@ cmp.setup {
     -- ['<S-Tab>'] = cmp.mapping(function(fallback)
     --   if cmp.visible() then
     --     cmp.select_prev_item()
-    --   elseif luasnip.locally_jumpable(-1) then
-    --     luasnip.jump(-1)
+    --   elseif luasnip.locally_jumpable(2) then
+    --     luasnip.jump(2)
     --   else
     --     fallback()
     --   end
@@ -647,4 +662,4 @@ cmp.setup {
 }
 
 -- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+-- vim: ts=5 sts=2 sw=2 et
